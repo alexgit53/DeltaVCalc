@@ -51,7 +51,7 @@ def main():
 
 
 def calculate_delta_v(m_init, m_end, isp):
-    return log(m_init / m_end) * isp * SURFACE_GRAVITIES["Kerbin"]
+    return log(m_init / m_end) * isp * 9.81
 
 
 def get_typed_input(prompt, type_function):
