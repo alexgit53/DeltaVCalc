@@ -8,4 +8,7 @@ Enter the start and end masses of the stage - the end mass can easily be found i
 
 Then enter the vacuum ISP of the engine you're using (mouse over the engine in the parts menu), and the total thrust of the stage - which is `engine thrust * number of engines`.
 
-The program will output your delta v; your acceleration at the start/end of the stage; and your TWRs on Kerbin, the Mun and Minmus at the start/end of the stage.
+- For atmospheric reults data, use atmospheric thrust/ISP values.
+- For vacuum resulta data, use vacuum thrust/ISP values.
+
+The program will output your delta v; your acceleration at the start/end of the stage; and your TWRs on Kerbin, the Mun and Minmus at the start/end of the stage. Note that the program is unable to correct for the atmosphere on Kerbin, so if you want your delta v and TWR to be applicable there, then make sure you entered the atmospheric values above!
