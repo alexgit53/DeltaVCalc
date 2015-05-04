@@ -6,7 +6,7 @@ __author__ = 'Alex'
 
 DELIMITER = "----------"
 TWR_DEC_PLACES = 2
-SURFACE_GRAVITIES = [("Kerbin", 9.81), ("Mun", 1.63), ("Minmus", 0.491)]
+SURFACE_GRAVITIES = [("Kerbin", 9.81), ("Mun", 1.63), ("Minmus", 0.491), ("Duna", 2.94)]
 
 
 def main():
