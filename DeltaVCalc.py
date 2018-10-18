@@ -1,89 +1,48 @@
 """ Small script to calculate a rocket stage's delta V for Kerbal Space Program """
 
 from math import log, trunc
+from gooey import Gooey, GooeyParser
 
-__author__ = 'Alex'
+__author__ = 'Alex Morrison'
 
 DELIMITER = "----------"
-TWR_DEC_PLACES = 1
-SURFACE_GRAVITIES = [("Kerbin", 9.81), ("Mun", 1.63), ("Minmus", 0.491), ("Duna", 2.94)]
+SURFACE_GRAVITIES = {"Kerbin": 9.81, "Mun": 1.63, "Minmus": 0.491, "Duna": 2.94}
 
-
+@Gooey(show_success_modal=False)
 def main():
-    while True:
-        try:
-            get_and_process_stage()
-        except ValueError:
-            print("Unphysical values")
-        input("Enter to begin again, or Ctrl+c to close...")
+    parser = GooeyParser(description="Calculate a rocket stage's delta V for KSP")
+    parser.add_argument("mass_initial", help="Initial mass of the spacecraft (tonnes)", type=float)
+    parser.add_argument("mass_final", help="Final mass of the spacecraft (tonnes)", type=float)
+    parser.add_argument("isp", help="Specific impulse", type=float)
+    parser.add_argument("--thrust", help="Total thrust of the spacecraft (kN)", type=float, default=0)
+    args = parser.parse_args()
+
+    get_and_process_stage(args.mass_initial, args.mass_final, args.isp, args.thrust)
 
 
-def calculate_delta_v(m_init, m_end, isp):
+
+def delta_v(m_init, m_end, isp):
     return log(m_init / m_end) * isp * 9.81
 
 
-def get_typed_input(prompt, type_function):
-    while True:
-        returned_value = input(prompt)
-        if not returned_value:
-            return None
-        try:
-            returned_value = type_function(returned_value)
-        except ValueError:
-            print("Invalid input")
-            continue
-        else:
-            return returned_value
+def get_and_process_stage(m_init, m_end, isp, thrust):
+    d_v = delta_v(m_init, m_end, isp)
+    print(f"Mass: {m_init}-{m_end}, ISP: {isp}, Thrust: {thrust}\n")
+    print(f"Delta v: {d_v:.0f} m/s")
 
+    if thrust > 0:
+        acc = (thrust / m_init, thrust / m_end)
+        burntime = 2 * d_v / (acc[0] + acc[-1])
+        burn_time_m, burn_time_s = divmod(burntime, 60)
+        twrs = {planet: (acc[0] / gravity, acc[-1] / gravity) for planet, gravity in SURFACE_GRAVITIES.items()}
 
-def get_and_process_stage():
-    print("Enter stage details")
-    # Get the stage values
-    m_init = get_typed_input("Initial mass: ", float)
-    m_end = get_typed_input("End mass: ", float)
-    # If we have no masses, we can't do any calculations, so start again
-    if None in (m_init, m_end):
-        print("Masses are required")
-        return
-    isp = get_typed_input("Engine ISP: ", float)
-    thrust = get_typed_input("Total thrust: ", float)
+        print(f"Acceleration range: {acc[0]:.1f} - {acc[-1]:.1f} m/s^2")
+        print(f"Stage time: {burn_time_m:.0f}m {burn_time_s:.0f}s")
+        print("TWRs (initial - final):")
+        for planet, twr in twrs.items():
+            print(f"\t{planet}\t{twr[0]:.2g}\t{twr[-1]:.2g}")
 
-    # Calculate our values if we have the data, or set them to a string if not
-    try:
-        delta_v = abs(trunc(calculate_delta_v(m_init, m_end, isp)))
-    except TypeError:
-        delta_v = "?"
-
-    try:
-        acc_init = abs(trunc(thrust / m_init))
-        acc_end = abs(trunc(thrust / m_end))
-        TWRs = ["{0}: {1} - {2}".format(planet,
-                                               str(round(acc_init / gravity, TWR_DEC_PLACES)),  # Min TWR
-                                               str(round(acc_end / gravity, TWR_DEC_PLACES))  # Max TWR
-                                               )
-                for (planet, gravity) in SURFACE_GRAVITIES]
-    except TypeError:
-        acc_end = "?"
-        acc_init = "?"
-        TWRs = ["?"]
-
-    try:
-        burn_time_m, burn_time_s = divmod(2 * delta_v / (acc_end + acc_init), 60)
-        burn_time_s = trunc(burn_time_s)
-        burn_time_m = trunc(burn_time_m)
-    except ValueError:
-        burn_time_m = "?"
-        burn_time_s = "?"
-
-    # Display our calculated values, and offer to repeat
     print(DELIMITER)
-    print("Delta v: {0} m/s".format(str(delta_v)))
-    print("Acceleration range: {0} - {1} m/s^2".format(str(min(acc_end, acc_init)), str(max(acc_end, acc_init))))
-    print("Stage time: {0}m {1}s".format(str(burn_time_m), str(burn_time_s)))
-    print("TWRs:")
-    print("\t" + "\n\t".join(TWRs))
-    print(DELIMITER)
-
     return
 
 
