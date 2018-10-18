@@ -57,7 +57,7 @@ def get_and_process_stage():
     try:
         acc_init = abs(trunc(thrust / m_init))
         acc_end = abs(trunc(thrust / m_end))
-        TWRs = ["TWR on {0}: {1} - {2}".format(planet,
+        TWRs = ["{0}: {1} - {2}".format(planet,
                                                str(round(acc_init / gravity, TWR_DEC_PLACES)),  # Min TWR
                                                str(round(acc_end / gravity, TWR_DEC_PLACES))  # Max TWR
                                                )
@@ -65,7 +65,7 @@ def get_and_process_stage():
     except TypeError:
         acc_end = "?"
         acc_init = "?"
-        TWRs = ["TWRs: ?"]
+        TWRs = ["?"]
 
     try:
         burn_time_m, burn_time_s = divmod(2 * delta_v / (acc_end + acc_init), 60)
@@ -80,7 +80,8 @@ def get_and_process_stage():
     print("Delta v: {0} m/s".format(str(delta_v)))
     print("Acceleration range: {0} - {1} m/s^2".format(str(min(acc_end, acc_init)), str(max(acc_end, acc_init))))
     print("Stage time: {0}m {1}s".format(str(burn_time_m), str(burn_time_s)))
-    print("\n".join(TWRs))
+    print("TWRs:")
+    print("\t" + "\n\t".join(TWRs))
     print(DELIMITER)
 
     return
